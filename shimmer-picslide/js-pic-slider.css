@@ -1,0 +1,42 @@
+.picslide {
+	position: relative;
+	list-style-type: none !important;
+}
+
+.picslide li {
+	display: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+
+	list-style-type: none !important;
+}
+
+.picslide li.first {
+	display: block;
+}
+
+.picslide h2 {
+	margin: 3px 0 1px 0;
+}
+
+.picslide .control-left,
+.picslide .control-right {
+	display: block;
+
+	width: 13%;
+	height: 100%;
+
+	position: absolute;
+	top: 0;
+	margin: 0;
+}
+
+.picslide .control-right {
+	right: 0;
+}
+
+.picslide .control-left:hover,
+.picslide .control-right:hover {
+	background-color: rgba( 255, 255, 255, 0.1 );
+}
