@@ -33,8 +33,7 @@ if( function_exists( 'add_image_size' ) ) {
 add_action( 'wp_head', 'JSPicSliderHead' );
 
 function JSPicSliderHead( ) {
-	$x = WP_PLUGIN_URL . '/' . str_replace( basename( __FILE__ ), "", plugin_basename( __FILE__ ) );
-	print "<link rel=\"stylesheet\" href=\"{$x}js-pic-slider.css\" />\n";
+	print "<link rel=\"stylesheet\" href=\"" . plugins_url( 'shimmer-picslide' ) . "/js-pic-slider.css\" />\n";
 }
 
 /*  Include scripts
@@ -44,10 +43,10 @@ function JSPicSliderHead( ) {
 add_action( 'init', 'JSPicSliderInit' );
 
 function JSPicSliderInit( ) {
-	$x = WP_PLUGIN_URL . '/' . str_replace( basename( __FILE__ ), "", plugin_basename( __FILE__ ) );
+	$x = plugins_url( 'shimmer-picslide' );
 
-	wp_enqueue_script( 'jquery', $x . "jquery-1.5.2.min.js", false, "1.5.2" );
-	wp_enqueue_script( 'js-pic-slider', $x . "js-pic-slider.js", array( "jquery" ), "0.1" );
+	wp_enqueue_script( 'jquery', $x . "/jquery-1.5.2.min.js", false, "1.5.2" );
+	wp_enqueue_script( 'js-pic-slider', $x . "/js-pic-slider.js", array( "jquery" ), "0.1" );
 }
 
 /*  Add widget
@@ -64,6 +63,11 @@ class JSPicSliderWidget extends WP_Widget {
 		parent::WP_Widget( false, $name = 'PicSlide', $widget_ops, $control_ops );
 	}
 
+	if( strpos( $instance['size'], "," ) ) {
+		list( $sw, $sh ) = split( ",", $instance['size'] );
+		$instance['size'] = array( $sw, $sh );
+	}
+
 	/** @see WP_Widget::widget */
 	function widget( $args, $instance ) {
 		extract( $args );
@@ -73,14 +77,14 @@ class JSPicSliderWidget extends WP_Widget {
 
 		// Print all the items here...
 		if( is_front_page( ) ) {
-			$id = get_option( 'page_on_front' );
+			$post_id = get_option( 'page_on_front' );
 		} else {
 			global $post;
-			$id = $post->ID;
+			$post_id = $post->ID;
 		}
 
 		$args = array(
-			'post_parent' => $post->ID,
+			'post_parent' => $post_id,
 			'post_type' => 'attachment',
 			'post_mime_type' => 'image',
 			'order_by' => 'menu_order'
@@ -159,6 +163,11 @@ function JSPicSliderShortcode( $atts, $content, $code ) {
 		'size' => '',
 		'parent' => ''
 	), $atts ) );
+
+	if( strpos( $size, "," ) ) {
+		list( $sw, $sh ) = split( ",", $size );
+		$size = array( $sw, $sh );
+	}
 
 	if( !$parent ) {
 		global $post;
