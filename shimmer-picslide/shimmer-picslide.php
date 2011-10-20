@@ -3,7 +3,7 @@
 Plugin Name: PicSlide
 Description: Show a slideshow with JS effects. Uses images uploaded to the current post. Available as widget and shortcode [picslide].
 Author: Pasi Lallinaho // Shimmer Project
-Version: 0.1
+Version: 0.2
 Author URI: http://knome.fi/
 Plugin URI: http://shimmerproject.org/
 */
@@ -63,11 +63,6 @@ class JSPicSliderWidget extends WP_Widget {
 		parent::WP_Widget( false, $name = 'PicSlide', $widget_ops, $control_ops );
 	}
 
-	if( strpos( $instance['size'], "," ) ) {
-		list( $sw, $sh ) = split( ",", $instance['size'] );
-		$instance['size'] = array( $sw, $sh );
-	}
-
 	/** @see WP_Widget::widget */
 	function widget( $args, $instance ) {
 		extract( $args );
@@ -101,6 +96,11 @@ class JSPicSliderWidget extends WP_Widget {
 				print "<li class=\"first active\">"; $i = 1;
 			} else {
 				print "<li>";
+			}
+
+			if( strpos( $instance['size'], "," ) ) {
+				list( $sw, $sh ) = split( ",", $instance['size'] );
+				$instance['size'] = array( $sw, $sh );
 			}
 
 			/* http://codex.wordpress.org/Function_Reference/wp_get_attachment_image */
