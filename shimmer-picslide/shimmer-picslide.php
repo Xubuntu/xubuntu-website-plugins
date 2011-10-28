@@ -114,8 +114,8 @@ class JSPicSliderWidget extends WP_Widget {
 		}
 
 		print '</ul>';
-		print '<a href="#" class="control-left">«</a>';
-		print '<a href="#" class="control-right">»</a>';
+		#print '<a href="#" class="control-left">«</a>';
+		#print '<a href="#" class="control-right">»</a>';
 		print '</div>';
 		echo $after_widget;
 	}
@@ -210,8 +210,8 @@ function JSPicSliderShortcode( $atts, $content, $code ) {
 	}
 
 	$out .= '</ul>';
-	$out .= '<a href="#" class="control control-left"></a>';
-	$out .= '<a href="#" class="control control-right"></a>';
+	#$out .= '<a href="#" class="control control-left"></a>';
+	#$out .= '<a href="#" class="control control-right"></a>';
 	$out .= '</div>';
 
 	return $out;
