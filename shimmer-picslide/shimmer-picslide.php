@@ -82,7 +82,8 @@ class JSPicSliderWidget extends WP_Widget {
 			'post_parent' => $post_id,
 			'post_type' => 'attachment',
 			'post_mime_type' => 'image',
-			'order_by' => 'menu_order'
+			'orderby' => 'menu_order',
+			'order' => 'ASC'
 		);
 
 		$attachments = get_children( $args );
@@ -184,7 +185,8 @@ function JSPicSliderShortcode( $atts, $content, $code ) {
 		'post_parent' => $id,
 		'post_type' => 'attachment',
 		'post_mime_type' => 'image',
-		'order_by' => 'menu_order'
+		'orderby' => 'menu_order',
+		'order' => 'ASC'
 	);
 
 	$attachments = get_children( $args );
