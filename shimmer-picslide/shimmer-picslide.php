@@ -107,10 +107,10 @@ class JSPicSliderWidget extends WP_Widget {
 			/* http://codex.wordpress.org/Function_Reference/wp_get_attachment_image */
 			if( !$instance['size'] ) { $size = get_option( 'picslide_default_size' ); } else { $size = $instance['size']; }
 			print wp_get_attachment_image( $a->ID, $size );
-			print "<p>" . $a->post_title . "</p>";
-			if( $a->post_content ) {
-				print "<p>" . $a->post_content  . "</p>";
-			}
+//			print "<p>" . $a->post_title . "</p>";
+//			if( $a->post_content ) {
+//				print "<p>" . $a->post_content  . "</p>";
+//			}
 			print "</li>";
 		}
 
@@ -204,10 +204,10 @@ function JSPicSliderShortcode( $atts, $content, $code ) {
 		/* http://codex.wordpress.org/Function_Reference/wp_get_attachment_image */
 		if( !$size ) { $size = get_option( 'picslide_default_size' ); }
 		$out .= wp_get_attachment_image( $a->ID, $size );
-		$out .= "<p>" . $a->post_title . "</p>";
-		if( $a->post_content ) {
-			$out .= "<p>" . $a->post_content  . "</p>";
-		}
+//		$out .= "<p>" . $a->post_title . "</p>";
+//		if( $a->post_content ) {
+//			$out .= "<p>" . $a->post_content  . "</p>";
+//		}
 		$out .= "</li>";
 	}
 
