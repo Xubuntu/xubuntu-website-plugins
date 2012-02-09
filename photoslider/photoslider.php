@@ -3,7 +3,7 @@
  *  Plugin Name: Photoslider
  *  Description: Show a slideshow of user uploaded photos.
  *  Author: Pasi Lallinaho
- *  Version: 1.1
+ *  Version: 1.3
  *  Author URI: http://open.knome.fi/
  *  Plugin URI: https://github.com/knomepasi/WordPress-plugins
  *
@@ -53,7 +53,7 @@ add_action( 'wp_enqueue_scripts', 'PhotosliderScripts' );
 function PhotosliderScripts( ) {
 	$x = plugins_url( 'photoslider' );
 	wp_enqueue_script( 'jquery' );
-	wp_enqueue_script( 'photoslider', $x . "/slider.js", array( "jquery" ), "1.0" );
+	wp_enqueue_script( 'photoslider', $x . "/slider.js", array( "jquery" ), "1.3" );
 }
 
 /*  Add widget
@@ -151,9 +151,8 @@ class PhotosliderWidget extends WP_Widget {
 					<?php
 						$to_opt = array(
 							"0" => __( "Don't advance automatically", "photoslider" ),
-							"3000" => _x( "Very fast", "transition speed", "photoslider" ),
-							"6000" => _x( "Fast", "transition speed", "photoslider" ),
-							"8500" => _x( "Default", "transition speed", "photoslider" ),
+							"6500" => _x( "Fast", "transition speed", "photoslider" ),
+							"9000" => _x( "Default", "transition speed", "photoslider" ),
 							"12000" => _x( "Slow", "transition speed", "photoslider" )
 						);
 						foreach( $to_opt as $id => $name ) {
@@ -210,8 +209,13 @@ Function GetPhotoslider( $opts, $attachments, $title ) {
 	/* determine photo size */
 	if( !$opts['size'] ) { $opts['size'] = get_option( 'photoslider_default_size' ); }
 
+	/* determine exact dimensions for first photo for non-js users */
+	$first_item = array_shift( array_values( $attachments ) );
+	$first_attr = wp_get_attachment_image_src( $first_item->ID, $opts['size'] );
+	$first_dmns = 'style="width: ' . $first_attr[1] . 'px; height: ' . $first_attr[2] . 'px;"';
+
 	/* start wrapping div */
-	$output = '<div class="ps_wrap">';
+	$output = '<div class="ps_wrap" ' . $first_dmns . '>';
 	$output .= '<div class="photoslider ctrl-' . $opts['controls'] . '" id="' . $opts['instance_id'] . '">';
 
 		$output .= '<div class="title">' . $title . '</div>';
@@ -221,7 +225,8 @@ Function GetPhotoslider( $opts, $attachments, $title ) {
 		$is_first = TRUE;
 		foreach( $attachments as $a ) {
 			if( $is_first ) {
-				$output .= '<li class="first active">'; $is_first = FALSE;
+				$output .= '<li class="first active">';
+				$is_first = FALSE;
 			} else {
 				$output .= '<li>';
 			}
