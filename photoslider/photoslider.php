@@ -3,17 +3,13 @@
  *  Plugin Name: Photoslider
  *  Description: Show a slideshow of user uploaded photos.
  *  Author: Pasi Lallinaho
- *  Version: 1.4
+ *  Version: 1.6
  *  Author URI: http://open.knome.fi/
- *  Plugin URI: https://github.com/knomepasi/WordPress-plugins
+ *  Plugin URI: http://wordpress.knome.fi/
  *
  *  License: GNU General Public License v2 or later
  *  License URI: http://www.gnu.org/licenses/gpl-2.0.html
  *
- */
-
-/*
- *  Uses images uploaded to the current post. Available as widget and shortcode [picslide].
  */
 
 /*  On plugin activation, create options for default values if needed
@@ -24,62 +20,60 @@ register_activation_hook( __FILE__, 'PhotosliderActivate' );
 
 function PhotosliderActivate( ) {
 	add_option( 'photoslider_default_size', 'medium' );
+	add_option( 'photoslider_previous_slide_string', '&laquo;' );
+	add_option( 'photoslider_next_slide_string', '&raquo;' );
 }
 
 /*  Init plugin
  *
  */
 
-add_action( 'init', 'PhotosliderInit' );
+add_action( 'plugins_loaded', 'PhotosliderInit' );
 
 function PhotosliderInit( ) {
 	/* Load text domain for i18n */
-	load_plugin_textdomain( 'photoslider' );
+	load_plugin_textdomain( 'photoslider', false, dirname( plugin_basename( FILE ) ) . '/languages/' );
 }
 
-/*  Include default CSS
- *
- */
-
-add_action( 'wp_head', 'PhotosliderHead' );
-
-function PhotosliderHead( ) {
-	print "<link rel=\"stylesheet\" href=\"" . plugins_url( 'photoslider' ) . "/defaults.css\" />\n";
-}
-
-/*  Include scripts
+/*  Include scripts and default stylesheets
  *
  */
 
 add_action( 'wp_enqueue_scripts', 'PhotosliderScripts' );
 
 function PhotosliderScripts( ) {
-	$x = plugins_url( 'photoslider' );
 	wp_enqueue_script( 'jquery' );
-	wp_enqueue_script( 'photoslider', $x . "/slider.js", array( "jquery" ), "1.3" );
+	wp_enqueue_script( 'jquery-effects-slide' );
+
+	wp_register_script( 'photoslider', plugins_url( 'slider.js', __FILE__ ), array ( 'jquery' ), '1.4' );
+	wp_enqueue_script( 'photoslider' );
+
+	wp_register_style( 'photoslider-defaults', plugins_url( 'defaults.css', __FILE__ ) );
+	wp_enqueue_style( 'photoslider-defaults' );
 }
 
-/*  Add widget
+/*  Widget
  *
  */
 
-add_action( 'widgets_init', create_function( '', 'return register_widget("PhotosliderWidget");' ) );
+add_action( 'widgets_init', function( ) { register_widget( 'PhotosliderWidget' ); } );
 
 class PhotosliderWidget extends WP_Widget {
 	/** constructor */
-	function PhotosliderWidget() {
-		$ops = array( "description" => __( 'Show a slideshow of user uploaded photos.', 'photoslider' ) );
-		parent::WP_Widget( false, $name = __( 'Photoslider', 'photoslider' ), $ops );
+	function __construct() {
+		$widget_ops = array( 'description' => __( 'Show a slideshow of user uploaded photos.', 'photoslider' ) );
+
+		parent::__construct( 'photoslider', _x( 'Photoslider', 'widget name', 'photoslider' ), $widget_ops );
 	}
 
 	/** @see WP_Widget::widget */
 	function widget( $args, $instance ) {
 		extract( $args );
 		$title = apply_filters( 'widget_title', $instance['title'] );
-		$attachments = PhotosliderAttachments( $instance['post'] );
-	
+		$attachments = PhotosliderAttachments( $instance['custom_id'], $instance['orderby'], $instance['order'] );
+
 		echo $before_widget;
-		if( $instance['title'] && $attachments ) { $title = $before_title . $title . $after_title; }
+		if( $instance['title'] ) { $title = $before_title . $title . $after_title; }
 		if( $attachments ) { echo GetPhotoslider( $instance, $attachments, $title ); }
 		echo $after_widget;
 	}
@@ -90,9 +84,15 @@ class PhotosliderWidget extends WP_Widget {
 		$instance['title'] = strip_tags( $new_instance['title'] );
 		$instance['size'] = strip_tags( $new_instance['size'] );
 		$instance['instance_id'] = strip_tags( $new_instance['instance_id'] );
-		$instance['controls'] = strip_tags( $new_instance['controls'] );
+		$instance['controls'] = $new_instance['controls'];
+		$instance['transition'] = $new_instance['transition'];
 		$instance['timeout'] = (int) $new_instance['timeout'];
 		$instance['captions'] = (int) $new_instance['captions'];
+		$instance['orderby'] = $new_instance['orderby'];
+		$instance['order'] = $new_instance['order'];
+		$instance['custom_id'] = (int) $new_instance['custom_id'];
+		$instance['url'] = $new_instance['url'];
+		$instance['url_title'] = $new_instance['url_title'];
 		return $instance;
 	}
 
@@ -100,13 +100,16 @@ class PhotosliderWidget extends WP_Widget {
 	function form( $instance ) {
 		$title = esc_attr( $instance['title'] );
 		$size = esc_attr( $instance['size'] );
+		$custom_id = esc_attr( $instance['custom_id'] );
+		$url = esc_attr( $instance['url'] );
+		$url_title = esc_attr( $instance['url_title'] );
 
 		if( !$size ) { $size = get_option( 'photoslider_default_size' ); }
 		?>
 
 		<p>
 			<label for="<?php echo $this->get_field_id( 'title' ); ?>"><?php _e( 'Title', 'photoslider' ); ?><br />
-				<input style="width: 220px;" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" />
+				<input class="widefat" id="<?php echo $this->get_field_id( 'title' ); ?>" name="<?php echo $this->get_field_name( 'title' ); ?>" type="text" value="<?php echo $title; ?>" />
 			</label>
 		</p>
 		<p>
@@ -130,8 +133,7 @@ class PhotosliderWidget extends WP_Widget {
 				?>
 				</select>
 			</label>
-		</p>
-		<p>
+
 			<label for="<?php echo $this->get_field_id( 'controls' ); ?>"><?php _e( 'Controls', 'photoslider' ); ?><br />
 				<select class="widefat" id="<?php echo $this->get_field_id( 'controls' ); ?>" name="<?php echo $this->get_field_name( 'controls' ); ?>">
 					<?php
@@ -147,8 +149,24 @@ class PhotosliderWidget extends WP_Widget {
 					?>
 				</select>
 			</label>
-		</p>
-		<p>
+
+			<label for="<?php echo $this->get_field_id( 'transition' ); ?>"><?php _e( 'Transition type', 'photoslider' ); ?><br />
+				<select class="widefat" id="<?php echo $this->get_field_id( 'transition' ); ?>" name="<?php echo $this->get_field_name( 'transition' ); ?>">
+					<?php
+						$to_opt = array(
+							'fade' => _x( 'Fade', 'transition type', 'photoslider' ),
+							'fadefast' => _x( 'Fade (fast)', 'transition type', 'photoslider' ),
+							'slideleft' => _x( 'Slide (towards left)', 'transition type', 'photoslider' ),
+							'slideright' => _x( 'Slide (towards right)', 'transition type', 'photoslider' ),
+						);
+						foreach( $to_opt as $id => $name ) {
+							if( $id == $instance['transition'] ) { $is_selected = ' selected="selected " '; } else { unset( $is_selected ); }
+							print '<option value="' . $id . '"' . $is_selected . '>' . $name . '</option>';
+						}
+					?>
+				</select>
+			</label>
+
 			<label for="<?php echo $this->get_field_id( 'timeout' ); ?>"><?php _e( 'Time between transitions', 'photoslider' ); ?><br />
 				<select class="widefat" id="<?php echo $this->get_field_id( 'timeout' ); ?>" name="<?php echo $this->get_field_name( 'timeout' ); ?>">
 					<?php
@@ -165,14 +183,51 @@ class PhotosliderWidget extends WP_Widget {
 					?>
 				</select>
 			</label>
-		</p>
-		<p>
+
 			<?php _e( 'Show captions?', 'photoslider' ); ?><br />
 			<?php if( $instance['captions'] < 1 ) { $capt_no = ' checked="checked" '; } else { $capt_yes = ' checked="checked" '; } ?>
 			<input type="radio" id="<?php echo $this->get_field_id( 'captions_yes' ); ?>" name="<?php echo $this->get_field_name( 'captions' ); ?>" value="1" <?php echo $capt_yes; ?> />
 			<label for="<?php echo $this->get_field_id( 'captions_yes' ); ?>"><?php _e( "Yes", "photoslider" ); ?></label>&nbsp;&nbsp;&nbsp;
 			<input type="radio" id="<?php echo $this->get_field_id( 'captions_no' ); ?>" name="<?php echo $this->get_field_name( 'captions' ); ?>" value="0" <?php echo $capt_no; ?> />
 			<label for="<?php echo $this->get_field_id( 'captions_no' ); ?>"><?php _e( "No", "photoslider" ); ?></label>
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id( 'orderby' ); ?>"><?php _e( 'Order by', 'photoslider' ); ?><br />
+				<select class="widefat" id="<?php echo $this->get_field_id( 'orderby' ); ?>" name="<?php echo $this->get_field_name( 'orderby' ); ?>">
+					<?php
+						$order_opt = array(
+							'title' => _x( 'Title', 'order by option', 'photoslider' ),
+							'date' => _x( 'Date', 'order by option', 'photoslider' ),
+							'name' => _x( 'Filename', 'order by option', 'photoslider' ),
+							'rand' => _x( 'Random', 'order by option', 'photoslider' )
+						);
+						foreach( $order_opt as $id => $name ) {
+							if( $id == $instance['orderby'] ) { $is_selected = ' selected="selected " '; } else { unset( $is_selected ); }
+							print '<option value="' . $id . '"' . $is_selected . '>' . $name . '</option>';
+						}
+					?>
+				</select>
+			</label>
+
+			<?php _e( 'Order', 'photoslider' ); ?><br />
+			<?php if( $instance['order'] == "ASC" ) { $order_asc = ' checked="checked" '; } else { $order_desc = ' checked="checked" '; } ?>
+			<input type="radio" id="<?php echo $this->get_field_id( 'order_asc' ); ?>" name="<?php echo $this->get_field_name( 'order' ); ?>" value="ASC" <?php echo $order_asc; ?> />
+			<label for="<?php echo $this->get_field_id( 'order_asc' ); ?>"><?php _e( "Ascending", "photoslider" ); ?></label>&nbsp;&nbsp;&nbsp;
+			<input type="radio" id="<?php echo $this->get_field_id( 'order_desc' ); ?>" name="<?php echo $this->get_field_name( 'order' ); ?>" value="DESC" <?php echo $order_desc; ?> />
+			<label for="<?php echo $this->get_field_id( 'order_desc' ); ?>"><?php _e( "Descending", "photoslider" ); ?></label>
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id( 'custom_id' ); ?>"><?php _e( 'Page or post ID (leave blank for current)', 'photoslider' ); ?><br />
+				<input class="widefat" id="<?php echo $this->get_field_id( 'custom_id' ); ?>" name="<?php echo $this->get_field_name( 'custom_id' ); ?>" type="text" value="<?php echo $custom_id; ?>" />
+			</label>
+		</p>
+		<p>
+			<label for="<?php echo $this->get_field_id( 'url' ); ?>"><?php _e( 'URL to redirect to when clicking outside the controls', 'photoslider' ); ?><br />
+				<input class="widefat" id="<?php echo $this->get_field_id( 'url' ); ?>" name="<?php echo $this->get_field_name( 'url' ); ?>" type="text" value="<?php echo $url; ?>" />
+			</label>
+			<label for="<?php echo $this->get_field_id( 'url_title' ); ?>"><?php _e( 'URL title text', 'photoslider' ); ?><br />
+				<input class="widefat" id="<?php echo $this->get_field_id( 'url_title' ); ?>" name="<?php echo $this->get_field_name( 'url_title' ); ?>" type="text" value="<?php echo $url_title; ?>" />
+			</label>
 		</p>
 
 		<input type="hidden" name="<?php echo $this->get_field_name( 'instance_id' ); ?>" value="<?php echo uniqid( 'photoslider_' ); ?>" />
@@ -182,6 +237,7 @@ class PhotosliderWidget extends WP_Widget {
 }
 
 /*  Add shortcode
+ *  FIXME: Document
  *
  */
 
@@ -191,14 +247,18 @@ function PhotosliderShortcode( $atts, $content, $code ) {
 	$slider_opts = shortcode_atts( array(
 		'size' => 'medium',
 		'controls' => 'none',
+		'transition' => 'fade',
 		'timeout' => 8000,
 		'captions' => 'no',
+		'orderby' => 'menu_order',
+		'orderdir' => 'ASC',
 		'post' => 0,
+		'url' => null
 	), $atts );
 
 	$slider_opts['instance_id'] = uniqid( 'photoslider_' );
 
-	$attachments = PhotosliderAttachments( $atts['post'] );
+	$attachments = PhotosliderAttachments( $atts['post'], $atts['orderby'], $atts['orderdir'] );
 	if( $attachments ) { $out = GetPhotoslider( $slider_opts, $attachments ); }
 
 	return $out;
@@ -215,14 +275,16 @@ Function GetPhotoslider( $opts, $attachments, $title ) {
 	/* determine exact dimensions for first photo for non-js users */
 	$first_item = array_shift( array_values( $attachments ) );
 	$first_attr = wp_get_attachment_image_src( $first_item->ID, $opts['size'] );
-	$first_dmns = 'style="width: ' . $first_attr[1] . 'px; height: ' . $first_attr[2] . 'px;"';
+	$first_dimensions = 'style="width: ' . $first_attr[1] . 'px; height: ' . $first_attr[2] . 'px;"';
 
 	/* start wrapping div */
-	$output = '<div class="ps_wrap" ' . $first_dmns . '>';
+	$output = '<div class="ps_wrap" ' . $first_dimensions . '>';
+	if( $opts['url'] ) {
+		$output .= '<a class="ps_link" href="' . $opts['url'] . '" title="' . $opts['url_title'] . '">';
+	}
 	$output .= '<div class="photoslider ctrl-' . $opts['controls'] . '" id="' . $opts['instance_id'] . '">';
 
 		$output .= '<div class="title">' . $title . '</div>';
-
 		$output .= '<ul>';
 
 		$is_first = TRUE;
@@ -254,12 +316,15 @@ Function GetPhotoslider( $opts, $attachments, $title ) {
 
 		$output .= '<div class="controls">';
 		if( $opts['controls'] != "none" ) {
-			$output .= '<a href="#" class="c-prev">&laquo;</a>';
-			$output .= '<a href="#" class="c-next">&raquo;</a>';
+			$output .= '<a href="#" class="c-prev" title="' . __( 'Previous', 'photoslider' ) . '">' . get_option( 'photoslider_previous_slide_string', 'photoslider' ) . '</a>';
+			$output .= '<a href="#" class="c-next" title="' . __( 'Next', 'photoslider' ) . '">' . get_option( 'photoslider_next_slide_string', 'photoslider' ) . '</a>';
 		}
 		$output .= '</div>';
 
 	$output .= '</div>';
+	if( $opts['url'] ) {
+		$output .= '</a>';
+	}
 	$output .= '</div>';
 
 	$output .= PhotosliderScriptsDynamic( $opts );
@@ -276,7 +341,7 @@ function PhotosliderScriptsDynamic( $args ) {
 	$out .= 'jQuery( window ).load( function( ) {';
 
 	$out .= 'var ' . $args['instance_id'] . ' = ' . "\n";
-	$out .= '{ "id": "' . $args['instance_id'] . '", "controls": "' . $args['controls'] . '", "timeout": "' . $args['timeout'] . '" } ' . "\n";
+	$out .= '{ "id": "' . $args['instance_id'] . '", "controls": "' . $args['controls'] . '", "timeout": "' . $args['timeout'] . '", "transition": "' . $args['transition'] . '" } ' . "\n";
 	$out .= '; ';
 
 	$out .= 'runPhotoslider( ' . $args['instance_id'] . ' );';
@@ -291,8 +356,8 @@ function PhotosliderScriptsDynamic( $args ) {
  *
  */
 
-function PhotosliderAttachments( $input ) {
-	if( is_front_page( ) && ( !$input || $input < 1 ) ) {
+function PhotosliderAttachments( $id, $order_by = 'date', $order_direction = 'DESC' ) {
+	if( is_front_page( ) && ( !$id || $id < 1 ) ) {
 		$post_id = get_option( 'page_on_front' );
 	} elseif( $input > 0 ) {
 		$post_id = $input;
@@ -305,7 +370,8 @@ function PhotosliderAttachments( $input ) {
 		'post_parent' => $post_id,
 		'post_type' => 'attachment',
 		'post_mime_type' => 'image',
-		'order_by' => 'menu_order'
+		'order_by' => $order_by,
+		'order' => $order_direction
 	);
 
 	$attachments = get_children( $args );

@@ -1,0 +1,169 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-01-09 23:48+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: ../plugins/photoslider/photoslider.php:64
+msgid "Show a slideshow of user uploaded photos."
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:66
+msgctxt "widget name"
+msgid "Photoslider"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:111
+msgid "Title"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:116
+msgid "Image size"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:137
+msgid "Controls"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:141
+msgctxt "controls"
+msgid "None"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:142
+msgctxt "controls"
+msgid "Above"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:143
+msgctxt "controls"
+msgid "On top"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:153
+msgid "Transition type"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:157
+msgctxt "transition type"
+msgid "Fade"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:158
+msgctxt "transition type"
+msgid "Fade (fast)"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:159
+msgctxt "transition type"
+msgid "Slide (towards left)"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:160
+msgctxt "transition type"
+msgid "Slide (towards right)"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:170
+msgid "Time between transitions"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:174
+msgid "Don't advance automatically"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:175
+msgctxt "transition speed"
+msgid "Fast"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:176
+msgctxt "transition speed"
+msgid "Default"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:177
+msgctxt "transition speed"
+msgid "Slow"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:187
+msgid "Show captions?"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:190
+msgid "Yes"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:192
+msgid "No"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:195
+msgid "Order by"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:199
+msgctxt "order by option"
+msgid "Title"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:200
+msgctxt "order by option"
+msgid "Date"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:201
+msgctxt "order by option"
+msgid "Filename"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:202
+msgctxt "order by option"
+msgid "Random"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:212
+msgid "Order"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:215
+msgid "Ascending"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:217
+msgid "Descending"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:220
+msgid "Page or post ID (leave blank for current)"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:225
+msgid "URL to redirect to when clicking outside the controls"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:228
+msgid "URL title text"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:319
+msgid "Previous"
+msgstr ""
+
+#: ../plugins/photoslider/photoslider.php:320
+msgid "Next"
+msgstr ""
