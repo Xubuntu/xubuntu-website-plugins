@@ -32,7 +32,7 @@ add_action( 'plugins_loaded', 'PhotosliderInit' );
 
 function PhotosliderInit( ) {
 	/* Load text domain for i18n */
-	load_plugin_textdomain( 'photoslider', false, dirname( plugin_basename( FILE ) ) . '/languages/' );
+	load_plugin_textdomain( 'photoslider', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 }
 
 /*  Include scripts and default stylesheets
@@ -45,10 +45,10 @@ function PhotosliderScripts( ) {
 	wp_enqueue_script( 'jquery' );
 	wp_enqueue_script( 'jquery-effects-slide' );
 
-	wp_register_script( 'photoslider', plugins_url( 'slider.js', __FILE__ ), array ( 'jquery' ), '1.4' );
+	wp_register_script( 'photoslider', plugins_url( dirname( plugin_basename( __FILE__ ) ) . '/slider.js' ), array ( 'jquery' ), '1.4' );
 	wp_enqueue_script( 'photoslider' );
 
-	wp_register_style( 'photoslider-defaults', plugins_url( 'defaults.css', __FILE__ ) );
+	wp_register_style( 'photoslider-defaults', plugins_url( dirname( plugin_basename( __FILE__ ) ) . '/defaults.css' ) );
 	wp_enqueue_style( 'photoslider-defaults' );
 }
 
