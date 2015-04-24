@@ -1,7 +1,7 @@
 <?php
 /*
- *  Plugin Name: Team Members
- *  Description: Adds the role "Team member"
+ *  Plugin Name: Xubuntu Team Members
+ *  Description: Adds the role "Xubuntu Team member"
  *  Author: Pasi Lallinaho
  *  Version: 1.0
  *  Author URI: http://open.knome.fi/
@@ -13,8 +13,8 @@
  */
 
 add_role(
-	'team_member',
-	'Team member',
+	'xubuntu_team_member',
+	'Xubuntu Team member',
 	array(
 		'read' => true,
 		'read_private_posts' => true,
